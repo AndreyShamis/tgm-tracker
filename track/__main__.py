@@ -33,7 +33,7 @@ from telethon.tl.types import UserStatusOffline, UserStatusOnline
 DATETIME_FORMAT = '%Y/%m/%d %H:%M:%S'
 
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(module)14.14s:%(lineno)4.4d | %(levelname)-5.5s  - %(message)s', datefmt='%d/%m/%y %H:%M:%S')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(module)10.10s:%(lineno)4.4d | %(levelname)-5.5s  - %(message)s', datefmt='%d/%m/%y %H:%M:%S')
 #logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
 
 
@@ -85,7 +85,11 @@ try:
                     sleep(2)
                 elif last_offline != contact.status.was_online:
                     if last_offline is not None:
-                        logging.info(f'{kt}: DISCONNECT after being online for short time!!!!!')
+                        if last_known_online:
+                            logging.info(f'{kt}: DISCONNECT [short time]. {round(datetime.now().timestamp()-last_known_online, 3)} sec. [{round(ct.timestamp()-last_known_online, 3)}]')
+                        else:
+                            logging.info(f'{kt}: DISCONNECT after being online for short time!!!!!')
+
                     else:
                         logging.info(f'{kt}: DISCONNECT !!!!.')
                 else:
@@ -116,5 +120,6 @@ try:
 except Exception as e:
     logging.exception(e)
 except KeyboardInterrupt as e:
-    logging.error(e)
+    pass
+
 
