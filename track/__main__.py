@@ -21,7 +21,7 @@
 
 from cmath import log
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from sys import argv, exit
 from time import mktime, sleep
 import random
@@ -62,6 +62,7 @@ logging.info(f' {"-"*25} Start {"-"*25}')
 # logging.info(f'bot_entity:{bot_entity}')
 try:
     while True:
+        sleep(1)
         try:
             if contact_id in ['me', 'self']:
                 # Workaround for the regression in Telethon that breaks get_entity('me'):
@@ -74,38 +75,47 @@ try:
 
             if isinstance(contact.status, UserStatusOffline):
                 ct = utc2localtime(contact.status.was_online)
+                kt = f'{ct.strftime(DATETIME_FORMAT)}'
                 if online != False:
                     online = False
-                    kt = f'{ct.strftime(DATETIME_FORMAT)}'
                     if last_known_online:
-                        logging.info(f'{kt}: DISCONNECT. {round(datetime.now().timestamp()-last_known_online, 3)} sec. [{round(ct.timestamp()-last_known_online, 3)}]')
+                        ct_delta = round(ct.timestamp()-last_known_online - 10800, 0)
+                        logging.info(f'{kt}: ------------ DIS. {round(datetime.now().timestamp()-last_known_online, 0)}s. [{timedelta(seconds=ct_delta)}]')
                     else:
-                        logging.info(f'{kt}: DISCONNECT.')
+                        logging.info(f'{kt}: ------------ DIS.')
                     last_known_online = None
                     sleep(2)
                 elif last_offline != contact.status.was_online:
                     if last_offline is not None:
                         if last_known_online:
-                            logging.info(f'{kt}: DISCONNECT [short time]. {round(datetime.now().timestamp()-last_known_online, 3)} sec. [{round(ct.timestamp()-last_known_online, 3)}]')
+                            ct_delta = round(ct.timestamp()-last_known_online - 10800, 0)
+                            logging.info(f'{kt}: ------------ DIS [short]. {round(datetime.now().timestamp()-last_known_online, 0)}s. [{timedelta(seconds=ct_delta)}]')
                         else:
-                            logging.info(f'{kt}: DISCONNECT after being online for short time!!!!!')
+                            logging.info(f'{kt}: ------------ DIS short!!!!!')
 
                     else:
-                        logging.info(f'{kt}: DISCONNECT !!!!.')
+                        logging.info(f'{kt}: ------------ DIS !!!!.')
                 else:
-                    sleep(5 + random.randint(0, 3))
+                    sleep(4 + random.randint(0, 4))
                 last_offline = contact.status.was_online
             elif isinstance(contact.status, UserStatusOnline):
+
                 if online != True:
                     online = True
                     last_known_online = datetime.now().timestamp()
-                    logging.warning(f'~{datetime.now().strftime(DATETIME_FORMAT)}: CONNECT.')
+                    if last_offline is not None:
+                        ct = utc2localtime(last_offline)
+                        toff = round(datetime.now().timestamp()-ct.timestamp() + 10800, 0)
+
+                        logging.warning(f'{datetime.now().strftime(DATETIME_FORMAT)}: CON.          OFF {timedelta(seconds=toff)}')
+                    else:
+                        logging.warning(f'{datetime.now().strftime(DATETIME_FORMAT)}: CON.')
                 sleep(3)
             else:
                 if online != False:
                     online = False
                     if last_known_online:
-                        logging.info(f'~{datetime.now().strftime(DATETIME_FORMAT)}: User went offline. {datetime.now().timestamp()-last_known_online}  sec')
+                        logging.info(f'~{datetime.now().strftime(DATETIME_FORMAT)}: User went offline. {datetime.now().timestamp()-last_known_online}  s')
                     else:
                         logging.info(f'~{datetime.now().strftime(DATETIME_FORMAT)}: User went offline {last_known_online}')
                     last_known_online = None
@@ -113,10 +123,11 @@ try:
                 last_offline = None
         except Exception as e:
             logging.exception(e)
-        if online == True:
-            sleep(5 + random.randint(0, 1))
-        else:
-            sleep(5 + random.randint(1, 15))
+        # if online == True:
+        #     sleep(5 + random.randint(0, 1))
+        # else:
+        #     sleep(5 + random.randint(1, 2))
+        sleep(4)
 except Exception as e:
     logging.exception(e)
 except KeyboardInterrupt as e:
