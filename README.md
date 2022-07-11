@@ -1,4 +1,4 @@
-telegram-tracker
+TGM-tracker
 ================
 
 This script allows to track your friend's online status changes.
@@ -10,7 +10,7 @@ Example output:
     =2018-01-19 @ 01:46:29: User went offline.
     =2018-01-19 @ 01:46:39: User went offline after being online for short time.
 
-= means that the time is exact as returned by the Telegram server, and ~ means that the time is measured locally and can be inexact.
+= means that the time is exact as returned by the TG server, and ~ means that the time is measured locally and can be inexact.
 
 How to run
 ----------
